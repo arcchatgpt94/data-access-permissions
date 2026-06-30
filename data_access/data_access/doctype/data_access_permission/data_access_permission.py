@@ -2,7 +2,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from data_access.config.data_access_types import DATA_ACCESS_TYPES, get_type_by_name
+from data_access.config.data_access_types import get_all_names, get_type_by_name
 from data_access.permissions import clear_user_cache
 
 
@@ -27,7 +27,7 @@ class DataAccessPermission(Document):
             frappe.throw(_("Select a user or a user group, not both."))
 
     def _validate_access_type(self):
-        valid_types = [item["name"] for item in DATA_ACCESS_TYPES]
+        valid_types = get_all_names()
         if self.access_type not in valid_types:
             frappe.throw(
                 _("Unsupported access type '{0}'. Available types: {1}").format(

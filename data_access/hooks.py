@@ -4,6 +4,9 @@ app_publisher = "Your Company"
 app_description = "Row-level data access permissions for Frappe/ERPNext"
 app_version = "1.1.0"
 
+after_install = "data_access.install.sync_data_access_types"
+after_migrate = "data_access.install.sync_data_access_types"
+
 add_to_apps_screen = [
     {
         "name": "data_access",

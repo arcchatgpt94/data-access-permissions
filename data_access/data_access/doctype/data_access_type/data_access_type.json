@@ -1,0 +1,143 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:access_type",
+ "creation": "2026-06-30 00:00:00.000000",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_identity",
+  "access_type",
+  "is_enabled",
+  "column_break_1",
+  "label",
+  "label_en",
+  "section_source",
+  "source_doctype",
+  "field_name",
+  "allow_blank",
+  "section_targets",
+  "target_doctypes",
+  "section_notes",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_identity",
+   "fieldtype": "Section Break",
+   "label": "Access Type"
+  },
+  {
+   "fieldname": "access_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Access Type",
+   "reqd": 1,
+   "search_index": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Arabic Label",
+   "reqd": 1
+  },
+  {
+   "fieldname": "label_en",
+   "fieldtype": "Data",
+   "label": "English Label"
+  },
+  {
+   "fieldname": "section_source",
+   "fieldtype": "Section Break",
+   "label": "Source Values"
+  },
+  {
+   "description": "The DocType that provides the values loaded into the permissions table.",
+   "fieldname": "source_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Source DocType",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "description": "The field name that exists on each target DocType.",
+   "fieldname": "field_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Target Field Name",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "If enabled, documents with an empty target field remain visible.",
+   "fieldname": "allow_blank",
+   "fieldtype": "Check",
+   "label": "Allow Blank Values"
+  },
+  {
+   "fieldname": "section_targets",
+   "fieldtype": "Section Break",
+   "label": "Target DocTypes"
+  },
+  {
+   "fieldname": "target_doctypes",
+   "fieldtype": "Table",
+   "label": "Target DocTypes",
+   "options": "Data Access Type Target",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_notes",
+   "fieldtype": "Section Break",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "icon": "fa fa-sliders",
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-06-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Data Access",
+ "name": "Data Access Type",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "access_type",
+ "track_changes": 1
+}

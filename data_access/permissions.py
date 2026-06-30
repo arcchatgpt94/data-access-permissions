@@ -192,7 +192,7 @@ def get_values_for_access_type(access_type: str) -> list[str]:
 
 @frappe.whitelist()
 def get_data_access_types() -> list[dict]:
-    from data_access.config.data_access_types import DATA_ACCESS_TYPES
+    from data_access.config.data_access_types import get_configured_access_types
 
     return [
         {
@@ -200,5 +200,5 @@ def get_data_access_types() -> list[dict]:
             "label": item["label"],
             "doctype": item["doctype"],
         }
-        for item in DATA_ACCESS_TYPES
+        for item in get_configured_access_types(enabled_only=True)
     ]

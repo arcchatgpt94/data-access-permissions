@@ -56,33 +56,39 @@ bench restart
 
 ## طريقة الاستخدام
 
-1. افتح DocType باسم `Data Access Permission`.
-2. اختر مستخدماً أو مجموعة مستخدمين، وليس الاثنين معاً.
-3. اختر نوع القيد مثل `Branch` أو `Cost Center`.
-4. اضغط `Tools > Load Values`.
-5. فعّل الصلاحيات المطلوبة لكل قيمة: `View`, `Add`, `Edit`, `Delete`.
+1. افتح DocType باسم `Data Access Type` وحدد الأنواع التي تريد إظهارها في حقل `Access Type`.
+2. لكل نوع، حدد `Source DocType` الذي تأتي منه القيم، مثل `Branch`.
+3. حدد `Target Field Name`، مثل `branch`.
+4. أضف المستندات المتأثرة في جدول `Target DocTypes`، مثل `Sales Invoice` و `Employee`.
+5. افتح DocType باسم `Data Access Permission`.
+6. اختر مستخدماً أو مجموعة مستخدمين، وليس الاثنين معاً.
+7. اختر نوع القيد مثل `Branch` أو `Cost Center`.
+8. ستظهر قيم النوع في الجدول، ثم فعّل الصلاحيات المطلوبة لكل قيمة: `View`, `Add`, `Edit`, `Delete`.
 
 إذا لم يكن للمستخدم أي سجل صلاحيات مفعّل لنوع معين، فلن يتم تقييده بهذا النوع. إذا كان لديه سجل مفعّل لكن لا توجد أي قيمة مسموحة، فسيتم منعه من الوصول لذلك النوع.
 
 ## أنواع القيود
 
-تُدار الأنواع من:
+تُدار الأنواع من شاشة:
+
+```text
+Data Access Type
+```
+
+ويتم إنشاء الأنواع الافتراضية تلقائياً من:
 
 ```text
 data_access/config/data_access_types.py
 ```
 
-مثال لإضافة نوع جديد:
+مثال لنوع `Branch`:
 
 ```python
 {
-    "name": "Territory",
-    "label": "المناطق",
-    "label_en": "Territory",
-    "doctype": "Territory",
-    "field_name": "territory",
-    "allow_blank": False,
-    "apply_to": ["Sales Invoice", "Sales Order", "Lead"],
+    "Access Type": "Branch",
+    "Source DocType": "Branch",
+    "Target Field Name": "branch",
+    "Target DocTypes": ["Employee", "Sales Invoice"],
 }
 ```
 
