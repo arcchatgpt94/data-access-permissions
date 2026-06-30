@@ -13,6 +13,34 @@
 - استخدام escaping لقيم SQL داخل شروط القراءة.
 - إصلاح النصوص المشوهة واستبدالها برسائل واضحة قابلة للترجمة.
 
+## هيكل التطبيق
+
+الهيكل مرتب كالتالي حتى يطابق توقعات Frappe:
+
+```text
+data_access_app_improved/
+├── setup.py
+├── MANIFEST.in
+├── README.md
+└── data_access/
+    ├── hooks.py
+    ├── permissions.py
+    ├── modules.txt
+    ├── config/
+    │   ├── desktop.py
+    │   └── data_access_types.py
+    └── data_access/
+        └── doctype/
+            ├── data_access_permission/
+            └── data_access_permission_detail/
+```
+
+في هذا الهيكل:
+
+- `data_access/hooks.py` هو ملف hooks الخاص بالتطبيق.
+- `data_access/permissions.py` يحتوي محرك الصلاحيات.
+- `data_access/data_access/doctype` يحتوي DocTypes الخاصة بـ module اسمه `Data Access`.
+
 ## طريقة التثبيت
 
 انسخ مجلد التطبيق كاملاً إلى مجلد `apps` داخل bench، وليس مجلد `data_access` وحده:
