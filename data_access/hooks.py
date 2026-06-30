@@ -4,6 +4,15 @@ app_publisher = "Your Company"
 app_description = "Row-level data access permissions for Frappe/ERPNext"
 app_version = "1.1.0"
 
+add_to_apps_screen = [
+    {
+        "name": "data_access",
+        "logo": "/assets/data_access/images/data-access.svg",
+        "title": "Data Access Permissions",
+        "route": "/app/data-access",
+    }
+]
+
 
 def _restricted_doctypes() -> list[str]:
     from data_access.config.data_access_types import DATA_ACCESS_TYPES
