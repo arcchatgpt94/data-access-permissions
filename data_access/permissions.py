@@ -107,8 +107,11 @@ def _field_condition(doctype: str, field: str, values: list[str], allow_blank: b
     return f"({value_condition})"
 
 
-def get_permission_query_condition(doctype: str, user: str | None = None) -> str:
+def get_permission_query_condition(user: str | None = None, doctype: str | None = None) -> str:
     user = user or frappe.session.user
+    if not doctype:
+        return ""
+
     if user_is_system_manager(user):
         return ""
 
