@@ -6,14 +6,18 @@ frappe.ui.form.on("Data Access Permission", {
         await load_access_type_options(frm);
     },
 
-    access_type(frm) {
+    async access_type(frm) {
         if (frm.doc.access_type) {
-            offer_load_all_values(frm);
+            await replace_values_for_access_type(frm);
+        } else {
+            frm.clear_table("permissions_table");
+            frm.refresh_field("permissions_table");
         }
     },
 
     refresh(frm) {
-        frm.add_custom_button(__("Load Values"), () => load_all_values(frm), __("Tools"));
+        frm.add_custom_button(__("Load Values"), () => load_all_values(frm, { replace: false }), __("Tools"));
+        frm.add_custom_button(__("Reload Values"), () => replace_values_for_access_type(frm), __("Tools"));
         frm.add_custom_button(__("Allow All"), () => toggle_all(frm, true), __("Tools"));
         frm.add_custom_button(__("Deny All"), () => toggle_all(frm, false), __("Tools"));
     },
@@ -50,16 +54,23 @@ async function load_access_type_options(frm) {
     frm.set_df_property("access_type", "options", ["", ...options].join("\n"));
 }
 
-function offer_load_all_values(frm) {
-    if ((frm.doc.permissions_table || []).length) return;
-
-    frappe.confirm(
-        __("Load all values for {0}?", [frm.doc.access_type]),
-        () => load_all_values(frm)
+async function replace_values_for_access_type(frm) {
+    const has_existing_values = (frm.doc.permissions_table || []).some(
+        (row) => row.reference_value
     );
+
+    if (has_existing_values) {
+        frappe.confirm(
+            __("Replace the current values with all {0} values?", [frm.doc.access_type]),
+            () => load_all_values(frm, { replace: true })
+        );
+        return;
+    }
+
+    await load_all_values(frm, { replace: true });
 }
 
-async function load_all_values(frm) {
+async function load_all_values(frm, options = {}) {
     if (!frm.doc.access_type) {
         frappe.msgprint(__("Select an access type first."));
         return;
@@ -68,14 +79,22 @@ async function load_all_values(frm) {
     frappe.dom.freeze(__("Loading..."));
     try {
         const response = await frappe.call({
-            doc: frm.doc,
-            method: "load_all_values",
+            method: "data_access.permissions.get_values_for_access_type",
+            args: {
+                access_type: frm.doc.access_type,
+            },
         });
 
         const values = response.message || [];
         if (!values.length) {
             frappe.msgprint(__("No values found for this access type."));
             return;
+        }
+
+        if (options.replace) {
+            frm.clear_table("permissions_table");
+        } else {
+            remove_empty_rows(frm);
         }
 
         const existing = new Set(
@@ -94,6 +113,7 @@ async function load_all_values(frm) {
         });
 
         frm.refresh_field("permissions_table");
+        frm.dirty();
         frappe.show_alert({
             message: __("Loaded {0} values.", [values.length]),
             indicator: "green",
@@ -101,6 +121,12 @@ async function load_all_values(frm) {
     } finally {
         frappe.dom.unfreeze();
     }
+}
+
+function remove_empty_rows(frm) {
+    frm.doc.permissions_table = (frm.doc.permissions_table || []).filter(
+        (row) => row.reference_value
+    );
 }
 
 function toggle_all(frm, checked) {

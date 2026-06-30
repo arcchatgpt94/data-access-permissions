@@ -5,7 +5,7 @@ from typing import Literal
 import frappe
 from frappe import _
 
-from data_access.config.data_access_types import get_types_for_doctype
+from data_access.config.data_access_types import get_type_by_name, get_types_for_doctype
 
 
 PermissionAction = Literal["view", "add", "edit", "delete"]
@@ -172,6 +172,22 @@ def get_allowed_values_for_user(user: str, access_type: str) -> list[str]:
     if not frappe.has_permission("Data Access Permission", "read"):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
     return get_user_allowed_values(user, access_type, "view") or []
+
+
+@frappe.whitelist()
+def get_values_for_access_type(access_type: str) -> list[str]:
+    if not frappe.has_permission("Data Access Permission", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    type_config = get_type_by_name(access_type)
+    if not type_config:
+        frappe.throw(_("Unsupported access type: {0}").format(access_type))
+
+    return frappe.get_all(
+        type_config["doctype"],
+        pluck="name",
+        order_by="name asc",
+    )
 
 
 @frappe.whitelist()
