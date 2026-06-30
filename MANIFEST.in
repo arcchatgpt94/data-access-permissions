@@ -1,3 +1,4 @@
 recursive-include data_access *.json
 recursive-include data_access *.js
 recursive-include data_access *.txt
+recursive-include data_access/public *
