@@ -1,0 +1,68 @@
+{
+ "actions": [],
+ "creation": "2026-06-30 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "reference_value",
+  "column_break_1",
+  "can_view",
+  "can_add",
+  "can_edit",
+  "can_delete"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "reference_value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Value",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "can_view",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "View"
+  },
+  {
+   "default": "0",
+   "fieldname": "can_add",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Add"
+  },
+  {
+   "default": "0",
+   "fieldname": "can_edit",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Edit"
+  },
+  {
+   "default": "0",
+   "fieldname": "can_delete",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Delete"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-06-30 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Data Access",
+ "name": "Data Access Permission Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
