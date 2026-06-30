@@ -1,14 +1,14 @@
 {
  "actions": [],
  "allow_rename": 0,
- "autoname": "field:access_type",
+ "autoname": "field:dimension",
  "creation": "2026-06-30 00:00:00.000000",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
   "section_identity",
-  "access_type",
+  "dimension",
   "is_enabled",
   "column_break_1",
   "label",
@@ -26,13 +26,13 @@
   {
    "fieldname": "section_identity",
    "fieldtype": "Section Break",
-   "label": "Access Type"
+   "label": "Dimension"
   },
   {
-   "fieldname": "access_type",
+   "fieldname": "dimension",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Access Type",
+   "label": "Dimension",
    "reqd": 1,
    "search_index": 1,
    "unique": 1
@@ -75,11 +75,11 @@
    "reqd": 1
   },
   {
-   "description": "The field name that exists on each target DocType.",
+   "description": "Fallback field name used when automatic discovery finds no target fields.",
    "fieldname": "field_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Target Field Name",
+   "label": "Default Field Name",
    "reqd": 1
   },
   {
@@ -97,8 +97,8 @@
   {
    "fieldname": "target_doctypes",
    "fieldtype": "Table",
-   "label": "Target DocTypes",
-   "options": "Data Access Type Target",
+   "label": "Detected Fields",
+   "options": "Data Permission Dimension Target",
    "reqd": 1
   },
   {
@@ -118,8 +118,8 @@
  "links": [],
  "modified": "2026-06-30 00:00:00.000000",
  "modified_by": "Administrator",
- "module": "Data Access",
- "name": "Data Access Type",
+ "module": "Data Permissions",
+ "name": "Data Permission Dimension",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
@@ -138,6 +138,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "access_type",
+ "title_field": "dimension",
  "track_changes": 1
 }

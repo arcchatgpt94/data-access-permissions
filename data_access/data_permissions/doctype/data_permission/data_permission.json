@@ -11,7 +11,7 @@
   "user",
   "user_group",
   "column_break_1",
-  "access_type",
+  "dimension",
   "is_active",
   "section_permissions",
   "permissions_table",
@@ -47,11 +47,11 @@
   },
   {
    "description": "The row-level dimension to restrict, such as Branch or Cost Center.",
-   "fieldname": "access_type",
+   "fieldname": "dimension",
    "fieldtype": "Select",
    "in_filter": 1,
    "in_list_view": 1,
-   "label": "Access Type",
+   "label": "Dimension",
    "reqd": 1,
    "search_index": 1
   },
@@ -71,7 +71,7 @@
    "fieldname": "permissions_table",
    "fieldtype": "Table",
    "label": "Permission Details",
-   "options": "Data Access Permission Detail",
+   "options": "Data Permission Detail",
    "reqd": 1
   },
   {
@@ -91,8 +91,8 @@
  "links": [],
  "modified": "2026-06-30 00:00:00.000000",
  "modified_by": "Administrator",
- "module": "Data Access",
- "name": "Data Access Permission",
+ "module": "Data Permissions",
+ "name": "Data Permission",
  "naming_rule": "Expression",
  "owner": "Administrator",
  "permissions": [

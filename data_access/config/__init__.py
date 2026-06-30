@@ -1,1 +1,1 @@
-from data_access.config.data_access_types import DATA_ACCESS_TYPES
+from data_access.config.data_permission_dimensions import DATA_ACCESS_TYPES

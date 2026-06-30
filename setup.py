@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="data_access",
     version="1.1.0",
-    description="Row-Level Data Access Permissions for Frappe",
+    description="Row-Level Data Permissions for Frappe",
     author="Your Company",
     author_email="info@yourcompany.com",
     packages=find_packages(),

@@ -1,14 +1,14 @@
-frappe.ui.form.on("Data Access Permission", {
+frappe.ui.form.on("Data Permission", {
     async onload(frm) {
         frm.set_query("user", () => ({
             filters: { enabled: 1, user_type: "System User" },
         }));
-        await load_access_type_options(frm);
+        await load_dimension_options(frm);
     },
 
-    async access_type(frm) {
-        if (frm.doc.access_type) {
-            await replace_values_for_access_type(frm);
+    async dimension(frm) {
+        if (frm.doc.dimension) {
+            await replace_values_for_dimension(frm);
         } else {
             frm.clear_table("permissions_table");
             frm.refresh_field("permissions_table");
@@ -17,13 +17,13 @@ frappe.ui.form.on("Data Access Permission", {
 
     refresh(frm) {
         frm.add_custom_button(__("Load Values"), () => load_all_values(frm, { replace: false }), __("Tools"));
-        frm.add_custom_button(__("Reload Values"), () => replace_values_for_access_type(frm), __("Tools"));
+        frm.add_custom_button(__("Reload Values"), () => replace_values_for_dimension(frm), __("Tools"));
         frm.add_custom_button(__("Allow All"), () => toggle_all(frm, true), __("Tools"));
         frm.add_custom_button(__("Deny All"), () => toggle_all(frm, false), __("Tools"));
     },
 });
 
-frappe.ui.form.on("Data Access Permission Detail", {
+frappe.ui.form.on("Data Permission Detail", {
     can_view(frm, cdt, cdn) {
         const row = locals[cdt][cdn];
         if (!row.can_view) {
@@ -46,22 +46,22 @@ frappe.ui.form.on("Data Access Permission Detail", {
     },
 });
 
-async function load_access_type_options(frm) {
-    const response = await frappe.call("data_access.permissions.get_data_access_types");
+async function load_dimension_options(frm) {
+    const response = await frappe.call("data_access.permissions.get_data_permission_dimensions");
     if (!response.message) return;
 
     const options = response.message.map((item) => item.name);
-    frm.set_df_property("access_type", "options", ["", ...options].join("\n"));
+    frm.set_df_property("dimension", "options", ["", ...options].join("\n"));
 }
 
-async function replace_values_for_access_type(frm) {
+async function replace_values_for_dimension(frm) {
     const has_existing_values = (frm.doc.permissions_table || []).some(
         (row) => row.reference_value
     );
 
     if (has_existing_values) {
         frappe.confirm(
-            __("Replace the current values with all {0} values?", [frm.doc.access_type]),
+            __("Replace the current values with all {0} values?", [frm.doc.dimension]),
             () => load_all_values(frm, { replace: true })
         );
         return;
@@ -71,23 +71,23 @@ async function replace_values_for_access_type(frm) {
 }
 
 async function load_all_values(frm, options = {}) {
-    if (!frm.doc.access_type) {
-        frappe.msgprint(__("Select an access type first."));
+    if (!frm.doc.dimension) {
+        frappe.msgprint(__("Select a dimension first."));
         return;
     }
 
     frappe.dom.freeze(__("Loading..."));
     try {
         const response = await frappe.call({
-            method: "data_access.permissions.get_values_for_access_type",
+            method: "data_access.permissions.get_values_for_dimension",
             args: {
-                access_type: frm.doc.access_type,
+                dimension: frm.doc.dimension,
             },
         });
 
         const values = response.message || [];
         if (!values.length) {
-            frappe.msgprint(__("No values found for this access type."));
+            frappe.msgprint(__("No values found for this dimension."));
             return;
         }
 
@@ -106,7 +106,7 @@ async function load_all_values(frm, options = {}) {
 
             const row = frappe.model.add_child(
                 frm.doc,
-                "Data Access Permission Detail",
+                "Data Permission Detail",
                 "permissions_table"
             );
             frappe.model.set_value(row.doctype, row.name, "reference_value", value);

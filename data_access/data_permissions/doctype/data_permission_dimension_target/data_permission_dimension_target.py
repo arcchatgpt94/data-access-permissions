@@ -1,5 +1,5 @@
 from frappe.model.document import Document
 
 
-class DataAccessTypeTarget(Document):
+class DataPermissionDimensionTarget(Document):
     pass

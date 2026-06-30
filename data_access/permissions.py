@@ -5,7 +5,7 @@ from typing import Literal
 import frappe
 from frappe import _
 
-from data_access.config.data_access_types import get_type_by_name, get_types_for_doctype
+from data_access.config.data_permission_dimensions import get_type_by_name, get_types_for_doctype
 
 
 PermissionAction = Literal["view", "add", "edit", "delete"]
@@ -23,14 +23,14 @@ def user_is_system_manager(user: str | None = None) -> bool:
     return "System Manager" in frappe.get_roles(user)
 
 
-def _cache_key(user: str, access_type: str, action: PermissionAction) -> str:
-    return f"data_access::{user}::{access_type}::{action}"
+def _cache_key(user: str, dimension: str, action: PermissionAction) -> str:
+    return f"data_access::{user}::{dimension}::{action}"
 
 
-def _get_applicable_permission_records(user: str, access_type: str) -> list[str]:
+def _get_applicable_permission_records(user: str, dimension: str) -> list[str]:
     user_records = frappe.get_all(
-        "Data Access Permission",
-        filters={"user": user, "access_type": access_type, "is_active": 1},
+        "Data Permission",
+        filters={"user": user, "dimension": dimension, "is_active": 1},
         pluck="name",
     )
 
@@ -43,10 +43,10 @@ def _get_applicable_permission_records(user: str, access_type: str) -> list[str]
     group_records: list[str] = []
     if user_groups:
         group_records = frappe.get_all(
-            "Data Access Permission",
+            "Data Permission",
             filters={
                 "user_group": ["in", user_groups],
-                "access_type": access_type,
+                "dimension": dimension,
                 "is_active": 1,
             },
             pluck="name",
@@ -57,7 +57,7 @@ def _get_applicable_permission_records(user: str, access_type: str) -> list[str]
 
 def get_user_allowed_values(
     user: str,
-    access_type: str,
+    dimension: str,
     action: PermissionAction = "view",
 ) -> list[str] | None:
     """Return None for unrestricted users, or a list of allowed values.
@@ -65,18 +65,18 @@ def get_user_allowed_values(
     An empty list means the user is restricted but has no allowed values for
     this action, so access must be denied.
     """
-    cache_key = _cache_key(user, access_type, action)
+    cache_key = _cache_key(user, dimension, action)
     cached = frappe.cache().get_value(cache_key)
     if cached is not None:
         return cached
 
-    permission_records = _get_applicable_permission_records(user, access_type)
+    permission_records = _get_applicable_permission_records(user, dimension)
     if not permission_records:
         frappe.cache().set_value(cache_key, None, expires_in_sec=300)
         return None
 
     allowed = frappe.get_all(
-        "Data Access Permission Detail",
+        "Data Permission Detail",
         filters={
             "parent": ["in", permission_records],
             ACTION_FIELD[action]: 1,
@@ -116,17 +116,17 @@ def get_permission_query_condition(user: str | None = None, doctype: str | None 
         return ""
 
     conditions = []
-    for access_type in get_types_for_doctype(doctype):
-        allowed = get_user_allowed_values(user, access_type["name"], "view")
+    for dimension in get_types_for_doctype(doctype):
+        allowed = get_user_allowed_values(user, dimension["name"], "view")
         if allowed is None:
             continue
 
         conditions.append(
             _field_condition(
                 doctype=doctype,
-                field=access_type["field_name"],
+                field=dimension["field_name"],
                 values=allowed,
-                allow_blank=bool(access_type.get("allow_blank", False)),
+                allow_blank=bool(dimension.get("allow_blank", False)),
             )
         )
 
@@ -139,20 +139,20 @@ def validate_document_access(doc, method: str | None = None):
         return
 
     action = _action_from_method(doc, method)
-    for access_type in get_types_for_doctype(doc.doctype):
-        allowed = get_user_allowed_values(user, access_type["name"], action)
+    for dimension in get_types_for_doctype(doc.doctype):
+        allowed = get_user_allowed_values(user, dimension["name"], action)
         if allowed is None:
             continue
 
-        field_value = doc.get(access_type["field_name"])
-        if not field_value and access_type.get("allow_blank", False):
+        field_value = doc.get(dimension["field_name"])
+        if not field_value and dimension.get("allow_blank", False):
             continue
 
         if not field_value or field_value not in allowed:
             frappe.throw(
                 _("You are not allowed to {0} this document for {1}: {2}").format(
                     _(action),
-                    _(access_type.get("label_en") or access_type["label"]),
+                    _(dimension.get("label_en") or dimension["label"]),
                     field_value or _("empty value"),
                 ),
                 frappe.PermissionError,
@@ -171,20 +171,20 @@ def _action_from_method(doc, method: str | None) -> PermissionAction:
 
 
 @frappe.whitelist()
-def get_allowed_values_for_user(user: str, access_type: str) -> list[str]:
-    if not frappe.has_permission("Data Access Permission", "read"):
+def get_allowed_values_for_user(user: str, dimension: str) -> list[str]:
+    if not frappe.has_permission("Data Permission", "read"):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
-    return get_user_allowed_values(user, access_type, "view") or []
+    return get_user_allowed_values(user, dimension, "view") or []
 
 
 @frappe.whitelist()
-def get_values_for_access_type(access_type: str) -> list[str]:
-    if not frappe.has_permission("Data Access Permission", "write"):
+def get_values_for_dimension(dimension: str) -> list[str]:
+    if not frappe.has_permission("Data Permission", "write"):
         frappe.throw(_("Not permitted"), frappe.PermissionError)
 
-    type_config = get_type_by_name(access_type)
+    type_config = get_type_by_name(dimension)
     if not type_config:
-        frappe.throw(_("Unsupported access type: {0}").format(access_type))
+        frappe.throw(_("Unsupported dimension: {0}").format(dimension))
 
     return frappe.get_all(
         type_config["doctype"],
@@ -194,8 +194,8 @@ def get_values_for_access_type(access_type: str) -> list[str]:
 
 
 @frappe.whitelist()
-def get_data_access_types() -> list[dict]:
-    from data_access.config.data_access_types import get_configured_access_types
+def get_data_permission_dimensions() -> list[dict]:
+    from data_access.config.data_permission_dimensions import get_configured_dimensions
 
     return [
         {
@@ -203,5 +203,15 @@ def get_data_access_types() -> list[dict]:
             "label": item["label"],
             "doctype": item["doctype"],
         }
-        for item in get_configured_access_types(enabled_only=True)
+        for item in get_configured_dimensions(enabled_only=True)
     ]
+
+
+@frappe.whitelist()
+def discover_targets_for_source(source_doctype: str) -> list[dict]:
+    if not frappe.has_permission("Data Permission Dimension", "write"):
+        frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+    from data_access.config.data_permission_dimensions import discover_dimension_targets
+
+    return discover_dimension_targets(source_doctype)

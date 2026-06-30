@@ -5,7 +5,7 @@ from frappe.model.document import Document
 from data_access.permissions import clear_user_cache
 
 
-class DataAccessType(Document):
+class DataPermissionDimension(Document):
     def validate(self):
         self._validate_targets()
 
@@ -21,6 +21,12 @@ class DataAccessType(Document):
 
         seen = set()
         for row in self.target_doctypes:
-            if row.target_doctype in seen:
-                frappe.throw(_("Target DocType '{0}' is duplicated.").format(row.target_doctype))
-            seen.add(row.target_doctype)
+            key = (row.target_doctype, row.field_name)
+            if key in seen:
+                frappe.throw(
+                    _("Target '{0}.{1}' is duplicated.").format(
+                        row.target_doctype,
+                        row.field_name,
+                    )
+                )
+            seen.add(key)

@@ -2,14 +2,14 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from data_access.config.data_access_types import get_all_names, get_type_by_name
+from data_access.config.data_permission_dimensions import get_all_names, get_type_by_name
 from data_access.permissions import clear_user_cache
 
 
-class DataAccessPermission(Document):
+class DataPermission(Document):
     def validate(self):
         self._validate_user_or_group()
-        self._validate_access_type()
+        self._validate_dimension()
         self._validate_permission_rows()
         self._check_duplicate()
 
@@ -26,12 +26,12 @@ class DataAccessPermission(Document):
         if self.user and self.user_group:
             frappe.throw(_("Select a user or a user group, not both."))
 
-    def _validate_access_type(self):
+    def _validate_dimension(self):
         valid_types = get_all_names()
-        if self.access_type not in valid_types:
+        if self.dimension not in valid_types:
             frappe.throw(
-                _("Unsupported access type '{0}'. Available types: {1}").format(
-                    self.access_type,
+                _("Unsupported dimension '{0}'. Available dimensions: {1}").format(
+                    self.dimension,
                     ", ".join(valid_types),
                 )
             )
@@ -47,7 +47,7 @@ class DataAccessPermission(Document):
 
     def _check_duplicate(self):
         filters = {
-            "access_type": self.access_type,
+            "dimension": self.dimension,
             "name": ["!=", self.name],
         }
 
@@ -56,10 +56,10 @@ class DataAccessPermission(Document):
         else:
             filters["user_group"] = self.user_group
 
-        existing = frappe.db.exists("Data Access Permission", filters)
+        existing = frappe.db.exists("Data Permission", filters)
         if existing:
             frappe.throw(
-                _("Duplicate Data Access Permission exists: {0}").format(existing)
+                _("Duplicate Data Permission exists: {0}").format(existing)
             )
 
     def _clear_cache(self):
@@ -70,7 +70,7 @@ class DataAccessPermission(Document):
 
     @frappe.whitelist()
     def load_all_values(self):
-        type_config = get_type_by_name(self.access_type)
+        type_config = get_type_by_name(self.dimension)
         if not type_config:
             return []
 

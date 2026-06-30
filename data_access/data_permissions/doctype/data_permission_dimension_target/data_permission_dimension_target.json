@@ -4,7 +4,8 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "target_doctype"
+  "target_doctype",
+  "field_name"
  ],
  "fields": [
   {
@@ -14,6 +15,14 @@
    "label": "Target DocType",
    "options": "DocType",
    "reqd": 1
+  },
+  {
+   "description": "The Link field that points to the source DocType.",
+   "fieldname": "field_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Field Name",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 0,
@@ -21,8 +30,8 @@
  "links": [],
  "modified": "2026-06-30 00:00:00.000000",
  "modified_by": "Administrator",
- "module": "Data Access",
- "name": "Data Access Type Target",
+ "module": "Data Permissions",
+ "name": "Data Permission Dimension Target",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

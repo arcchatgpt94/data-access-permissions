@@ -1,99 +1,132 @@
-# Data Access Permissions
+# Data Permissions
 
-تطبيق Frappe/ERPNext لإضافة قيود وصول على مستوى الصفوف بناءً على قيم مثل الفرع، مركز التكلفة، الحساب، أو المستودع.
+تطبيق Frappe/ERPNext لتقييد الوصول إلى البيانات بناءً على حقول مرجعية تأتي من التهيئات، مثل الفرع، مركز التكلفة، المستودع، الإدارة، المسمى الوظيفي، والشركة.
 
-## ما الذي تغيّر في هذه النسخة
+الفكرة الأساسية: إذا كان هناك حقل Link يأخذ قيمه من DocType تهيئة مثل `Branch`، فالنظام يستطيع تطبيق صلاحية البيانات عليه أينما ظهر في شاشات النظام.
 
-- تنظيف بنية المشروع وحذف مخلفات التوليد.
-- إصلاح `modules.txt` ليطابق بنية تطبيقات Frappe.
-- تسجيل `permission_query_conditions` و `doc_events` مباشرة من `hooks.py`.
-- إصلاح فحص دور `System Manager`.
-- جعل الصلاحيات آمنة افتراضياً: وجود سجل صلاحية بلا قيم مسموحة يعني المنع، لا السماح.
-- تطبيق صلاحيات العرض والإضافة والتعديل والحذف بدلاً من استخدام العرض فقط.
-- استخدام escaping لقيم SQL داخل شروط القراءة.
-- إصلاح النصوص المشوهة واستبدالها برسائل واضحة قابلة للترجمة.
+## المفهوم
+
+بدلاً من تقييد أي حقل عشوائي، يعتمد التطبيق على أبعاد بيانات واضحة:
+
+```text
+Branch
+Cost Center
+Warehouse
+Department
+Designation
+Company
+```
+
+كل Dimension يحدد:
+
+```text
+Source DocType  = مصدر القيم، مثل Branch
+Detected Fields = كل الحقول في النظام التي تشير إلى هذا المصدر
+```
+
+مثال:
+
+```text
+Dimension: Branch
+Source DocType: Branch
+Detected Fields:
+- Employee.branch
+- Sales Invoice.branch
+- Purchase Invoice.branch
+```
+
+بعد ذلك تمنح المستخدم صلاحية على القيم نفسها:
+
+```text
+User: ahmed@example.com
+Dimension: Branch
+Allowed Values:
+- Baghdad: View, Add, Edit
+- Basra: View only
+```
+
+## الشاشات
+
+### Data Permission Dimension
+
+هذه شاشة تعريف أبعاد صلاحيات البيانات. منها تحدد القيم التي تظهر في حقل `Dimension` داخل شاشة الصلاحيات.
+
+أهم الحقول:
+
+```text
+Dimension          اسم البعد، مثل Branch
+Source DocType     مصدر القيم، مثل Branch
+Default Field Name اسم حقل احتياطي، مثل branch
+Detected Fields    الشاشات والحقول التي سيتم تطبيق القيد عليها
+Enabled            تفعيل أو إخفاء هذا البعد
+```
+
+زر `Discover Fields` يبحث تلقائياً عن كل حقول Link التي تأخذ قيمها من `Source DocType`.
+
+### Data Permission
+
+هذه شاشة منح الصلاحيات للمستخدم أو مجموعة المستخدمين.
+
+أهم الحقول:
+
+```text
+User / User Group
+Dimension
+Permission Details
+```
+
+عند اختيار Dimension، تظهر كل القيم من Source DocType في الجدول، ثم تحدد:
+
+```text
+View
+Add
+Edit
+Delete
+```
 
 ## هيكل التطبيق
 
-الهيكل مرتب كالتالي حتى يطابق توقعات Frappe:
-
 ```text
-data_access_app_improved/
-├── setup.py
-├── MANIFEST.in
-├── README.md
-└── data_access/
-    ├── hooks.py
-    ├── permissions.py
-    ├── modules.txt
-    ├── config/
-    │   ├── desktop.py
-    │   └── data_access_types.py
-    └── data_access/
-        └── doctype/
-            ├── data_access_permission/
-            └── data_access_permission_detail/
+data_access/
+├── hooks.py
+├── permissions.py
+├── install.py
+├── modules.txt
+├── config/
+│   ├── desktop.py
+│   └── data_permission_dimensions.py
+└── data_permissions/
+    └── doctype/
+        ├── data_permission/
+        ├── data_permission_detail/
+        ├── data_permission_dimension/
+        └── data_permission_dimension_target/
 ```
 
-في هذا الهيكل:
+اسم التطبيق البرمجي بقي `data_access` حتى لا ينكسر التثبيت، لكن اسم الـ Module والشاشات أصبح `Data Permissions`.
 
-- `data_access/hooks.py` هو ملف hooks الخاص بالتطبيق.
-- `data_access/permissions.py` يحتوي محرك الصلاحيات.
-- `data_access/data_access/doctype` يحتوي DocTypes الخاصة بـ module اسمه `Data Access`.
-
-## طريقة التثبيت
-
-انسخ مجلد التطبيق كاملاً إلى مجلد `apps` داخل bench، وليس مجلد `data_access` وحده:
+## التثبيت
 
 ```bash
-cd /path/to/frappe-bench
-cp -r /path/to/data_access_app_improved apps/data_access
+bench get-app https://github.com/arcchatgpt94/data-access-permissions.git
 bench --site your-site.local install-app data_access
 bench --site your-site.local migrate
 bench build --app data_access
 bench restart
 ```
 
-## طريقة الاستخدام
+## التحديث
 
-1. افتح DocType باسم `Data Access Type` وحدد الأنواع التي تريد إظهارها في حقل `Access Type`.
-2. لكل نوع، حدد `Source DocType` الذي تأتي منه القيم، مثل `Branch`.
-3. حدد `Target Field Name`، مثل `branch`.
-4. أضف المستندات المتأثرة في جدول `Target DocTypes`، مثل `Sales Invoice` و `Employee`.
-5. افتح DocType باسم `Data Access Permission`.
-6. اختر مستخدماً أو مجموعة مستخدمين، وليس الاثنين معاً.
-7. اختر نوع القيد مثل `Branch` أو `Cost Center`.
-8. ستظهر قيم النوع في الجدول، ثم فعّل الصلاحيات المطلوبة لكل قيمة: `View`, `Add`, `Edit`, `Delete`.
-
-إذا لم يكن للمستخدم أي سجل صلاحيات مفعّل لنوع معين، فلن يتم تقييده بهذا النوع. إذا كان لديه سجل مفعّل لكن لا توجد أي قيمة مسموحة، فسيتم منعه من الوصول لذلك النوع.
-
-## أنواع القيود
-
-تُدار الأنواع من شاشة:
-
-```text
-Data Access Type
+```bash
+cd ~/frappe-bench/apps/data_access
+git pull
+cd ~/frappe-bench
+bench --site your-site.local migrate
+bench --site your-site.local clear-cache
+bench build --app data_access
+bench restart
 ```
 
-ويتم إنشاء الأنواع الافتراضية تلقائياً من:
+## حدود مهمة
 
-```text
-data_access/config/data_access_types.py
-```
-
-مثال لنوع `Branch`:
-
-```python
-{
-    "Access Type": "Branch",
-    "Source DocType": "Branch",
-    "Target Field Name": "branch",
-    "Target DocTypes": ["Employee", "Sales Invoice"],
-}
-```
-
-## حدود مهمة قبل الإنتاج
-
-هذا التطبيق يقيّد الحقول الموجودة مباشرة في DocType الرئيسي فقط. كثير من مستندات ERPNext تضع الحسابات، المستودعات، ومراكز التكلفة داخل child tables، وهذه تحتاج دعماً إضافياً باستعلامات مخصصة أو منطق تحقق على الجداول الفرعية.
-
-يُنصح باختباره على بيئة تجريبية مع مستخدمين حقيقيين وسيناريوهات قراءة/إضافة/تعديل/حذف قبل تثبيته على بيئة إنتاج.
+الإصدار الحالي يطبق القيود على الحقول الموجودة مباشرة في DocType الرئيسي. دعم الجداول الفرعية مثل `Sales Invoice Item.warehouse` أو `Journal Entry Account.cost_center` يحتاج مرحلة إضافية لأن فلترة القوائم عبر child tables تتطلب شروط SQL مختلفة.
