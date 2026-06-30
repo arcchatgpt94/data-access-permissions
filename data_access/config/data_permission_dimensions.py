@@ -97,6 +97,7 @@ DEFAULT_DATA_PERMISSION_DIMENSIONS = [
 # Hooks are loaded before setup DocTypes may exist. Runtime behavior reads from
 # Data Permission Dimension after the app is installed.
 DATA_PERMISSION_DIMENSIONS = DEFAULT_DATA_PERMISSION_DIMENSIONS
+DATA_ACCESS_TYPES = DATA_PERMISSION_DIMENSIONS
 
 
 def get_configured_dimensions(enabled_only: bool = True) -> list[dict]:
