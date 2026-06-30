@@ -1,6 +1,3 @@
-from data_access.config.data_access_types import DATA_ACCESS_TYPES
-
-
 app_name = "data_access"
 app_title = "Data Access Permissions"
 app_publisher = "Your Company"
@@ -9,6 +6,8 @@ app_version = "1.1.0"
 
 
 def _restricted_doctypes() -> list[str]:
+    from data_access.config.data_access_types import DATA_ACCESS_TYPES
+
     doctypes = set()
     for access_type in DATA_ACCESS_TYPES:
         doctypes.update(access_type.get("apply_to", []))
